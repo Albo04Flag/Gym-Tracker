@@ -1,0 +1,14 @@
+{
+  "name": "Palestra",
+  "short_name": "Palestra",
+  "description": "Schede di allenamento: giorni, esercizi, serie, pesi e andamento nel tempo.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#17150F",
+  "theme_color": "#17150F",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
