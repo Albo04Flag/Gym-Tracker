@@ -506,6 +506,7 @@ function normalize(s){
             note: typeof e.note==="string" ? e.note : "",
             photoId: e.photoId || null,
             editing: false,
+            open: false,
             linkAll: !!e.linkAll,
             history: (Array.isArray(e.history)?e.history:[]).map(function(p){ p=p||{}; return { d:String(p.d||""), w:num(p.w,0) }; }).filter(function(p){ return p.d && p.w>0; }),
             sets: (Array.isArray(e.sets)?e.sets:[]).map(function(x){ x=x||{}; return { reps:num(x.reps,10), weight:num(x.weight,0), done:!!x.done }; })
@@ -526,6 +527,7 @@ function load(){
       if(!s.settings.theme) s.settings.theme = "iron";
       s.days.forEach(function(d){ (d.exercises||[]).forEach(function(e){
         e.editing = false;
+        e.open = false;
         if(typeof e.linkAll!=="boolean") e.linkAll = false;
         if(!Array.isArray(e.history)) e.history = [];
       }); });
@@ -593,6 +595,7 @@ function deleteExercise(d, e){
   d.exercises = d.exercises.filter(function(x){ return x.id!==e.id; });
   save(); render();
 }
+function toggleOpen(e){ if(e.open || e.editing){ e.open=false; e.editing=false; } else { e.open=true; } save(); render(); }
 function toggleEdit(e){ e.editing = !e.editing; save(); render(); }
 function toggleLinkAll(e){ e.linkAll = !e.linkAll; save(); render(); }
 function addSet(e){ var last = e.sets[e.sets.length-1]; e.sets.push(last ? { reps:last.reps, weight:last.weight, done:false } : mkSet()); save(); render(); }
@@ -793,8 +796,9 @@ function renderDay(d){
 
 function exerciseCard(d, e, i){
   var editing = !!e.editing;
-  var card = el("div", { "class":"ex-card" + (editing?" open":"") });
-  var head = el("div", { "class":"ex-head", onClick:function(){ toggleEdit(e); } });
+  var open = !!e.open || editing;
+  var card = el("div", { "class":"ex-card" + (open?" open":"") });
+  var head = el("div", { "class":"ex-head", onClick:function(){ toggleOpen(e); } });
 
   var thumb = el("div", { "class":"thumb" });
   if(e.photoId){ var im = el("img", { "class":"thumb-img", alt:"" }); loadPhoto(im, e.photoId); thumb.appendChild(im); }
@@ -815,10 +819,11 @@ function exerciseCard(d, e, i){
     el("span", { "class":"wtag-n" }, sm.wMain),
     sm.wUnit ? el("span", { "class":"wtag-u" }, sm.wUnit) : null
   ));
-  head.appendChild(iconBtn(editing?ICON.up:ICON.down, editing?"Chiudi modifica":"Modifica", function(ev){ ev.stopPropagation(); toggleEdit(e); }));
+  head.appendChild(iconBtn(open?ICON.up:ICON.down, open?"Chiudi":"Apri", function(ev){ ev.stopPropagation(); toggleOpen(e); }));
   card.appendChild(head);
 
-  card.appendChild(editing ? exerciseBody(d, e, i) : previewList(e));
+  if(editing) card.appendChild(exerciseBody(d, e, i));
+  else if(open) card.appendChild(previewList(e));
   return card;
 }
 
